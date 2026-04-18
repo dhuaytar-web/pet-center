@@ -1,0 +1,7 @@
+<svg width="600" height="600" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="600" rx="36" fill="#F3FAFB"/>
+  <rect x="70" y="70" width="460" height="460" rx="28" fill="#E1F3F6"/>
+  <circle cx="300" cy="250" r="84" fill="#B7E3EA"/>
+  <path d="M205 410C228 356 269 330 300 330C331 330 372 356 395 410" stroke="#4C98A7" stroke-width="24" stroke-linecap="round"/>
+  <text x="300" y="500" text-anchor="middle" fill="#267184" font-family="Arial, sans-serif" font-size="28" font-weight="700">PET CENTER</text>
+</svg>

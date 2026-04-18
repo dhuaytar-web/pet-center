@@ -1,8 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## PET CENTER MVP
 
-## Getting Started
+E-commerce veterinario local (Tacna) construido con Next.js + Supabase.
 
-First, run the development server:
+Estado actual:
+- Catalogo publico completo
+- Carrito y checkout funcional
+- Panel admin con login y gestion de productos/pedidos
+- SEO minimo (`/robots.txt`, `/sitemap.xml`)
+- Notificaciones WhatsApp/Email (best-effort)
+
+## Requisitos
+
+- Node.js 20+
+- Proyecto Supabase con tablas `productos`, `pedidos`, `pedido_items`
+
+## Variables de entorno
+
+1. Copia `.env.example` como `.env.local`.
+2. Completa las claves.
+
+Variables criticas:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+Opcionales para notificaciones:
+- `TWILIO_ACCOUNT_SID`
+- `TWILIO_AUTH_TOKEN`
+- `TWILIO_WHATSAPP_FROM`
+- `SENDGRID_API_KEY`
+
+## Desarrollo local
+
+Ejecuta:
 
 ```bash
 npm run dev
@@ -14,23 +44,27 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre `http://localhost:3000` en el navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Rutas principales:
+- `/` home
+- `/farmacia`, `/nutricion`, `/accesorios`
+- `/carrito`, `/checkout`
+- `/admin/login`, `/admin`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Build de produccion
 
-## Learn More
+```bash
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Deploy recomendado: Vercel.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Configura primero las mismas variables de `.env.local` en Vercel Project Settings.
 
-## Deploy on Vercel
+## Nota sobre notificaciones
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Si Twilio/Sendgrid no estan configurados, el flujo de pedidos sigue funcionando.
+Las notificaciones se envian en modo best-effort y no bloquean la compra.
