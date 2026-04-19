@@ -1,5 +1,5 @@
-import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import AdminPedidosTable from '@/components/admin/AdminPedidosTable'
 
 type PedidoRow = {
   id: string
@@ -12,8 +12,19 @@ type PedidoRow = {
 }
 
 export default async function AdminPedidosPage() {
-  const supabase = await createClient()
-  const { data } = await supabase
+  const supabase = createAdminClient()
+  if (!supabase) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold text-slate-900">Pedidos</h1>
+        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+          Falta configurar SUPABASE_SERVICE_ROLE_KEY para mostrar el panel administrativo.
+        </p>
+      </div>
+    )
+  }
+
+  const { data, error } = await supabase
     .from('pedidos')
     .select('id,numero_pedido,nombre_cliente,telefono,total,estado,created_at')
     .order('created_at', { ascending: false })
@@ -24,48 +35,13 @@ export default async function AdminPedidosPage() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-slate-900">Pedidos</h1>
 
-      <div className="overflow-x-auto rounded-2xl border border-cyan-100 bg-white shadow-sm">
-        <table className="w-full min-w-[760px] text-sm">
-          <thead className="bg-cyan-50 text-left text-cyan-900">
-            <tr>
-              <th className="px-4 py-3">N. pedido</th>
-              <th className="px-4 py-3">Cliente</th>
-              <th className="px-4 py-3">Telefono</th>
-              <th className="px-4 py-3">Total</th>
-              <th className="px-4 py-3">Estado</th>
-              <th className="px-4 py-3">Fecha</th>
-              <th className="px-4 py-3">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pedidos.map((pedido) => (
-              <tr key={pedido.id} className="border-t border-cyan-100">
-                <td className="px-4 py-3 font-medium text-slate-900">{pedido.numero_pedido}</td>
-                <td className="px-4 py-3">{pedido.nombre_cliente}</td>
-                <td className="px-4 py-3">{pedido.telefono}</td>
-                <td className="px-4 py-3">S/ {Number(pedido.total).toFixed(2)}</td>
-                <td className="px-4 py-3">
-                  <span className="rounded-full bg-cyan-100 px-2 py-1 text-xs font-semibold text-cyan-800">{pedido.estado}</span>
-                </td>
-                <td className="px-4 py-3 text-slate-600">{new Date(pedido.created_at).toLocaleDateString()}</td>
-                <td className="px-4 py-3">
-                  <Link href={`/admin/pedidos/${pedido.id}`} className="text-xs font-semibold text-cyan-700 hover:text-cyan-900">
-                    Ver detalle
-                  </Link>
-                </td>
-              </tr>
-            ))}
+      {error && (
+        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+          No se pudieron cargar pedidos: {error.message}
+        </p>
+      )}
 
-            {pedidos.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
-                  No hay pedidos registrados.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <AdminPedidosTable pedidos={pedidos} />
     </div>
   )
 }

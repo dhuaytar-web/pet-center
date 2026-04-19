@@ -9,6 +9,7 @@ export default function LoginForm() {
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const forbidden = searchParams.get('forbidden') === '1'
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -37,6 +38,12 @@ export default function LoginForm() {
     <form onSubmit={onSubmit} className="rounded-3xl border border-cyan-100 bg-white p-6 shadow-sm">
       <h1 className="text-2xl font-bold text-slate-900">Acceso administrador</h1>
       <p className="mt-2 text-sm text-slate-600">Ingresa con tu correo y contrasena de Supabase Auth.</p>
+
+      {forbidden && (
+        <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800">
+          Tu cuenta no tiene permisos de administracion.
+        </p>
+      )}
 
       <div className="mt-6 grid gap-3">
         <label className="text-sm">

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import EstadoPedidoForm from '@/app/admin/pedidos/[id]/EstadoPedidoForm'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 type AdminPedidoDetailPageProps = {
   params: Promise<{ id: string }>
@@ -9,13 +9,35 @@ type AdminPedidoDetailPageProps = {
 
 export default async function AdminPedidoDetailPage({ params }: AdminPedidoDetailPageProps) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
-  const { data: pedido } = await supabase
+  if (!supabase) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-3xl font-bold text-slate-900">Detalle de pedido</h1>
+        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+          Falta configurar SUPABASE_SERVICE_ROLE_KEY para mostrar el panel administrativo.
+        </p>
+      </div>
+    )
+  }
+
+  const { data: pedido, error: pedidoError } = await supabase
     .from('pedidos')
     .select('id,numero_pedido,nombre_cliente,telefono,total,estado,metodo_pago,notas,created_at')
     .eq('id', id)
     .maybeSingle()
+
+  if (pedidoError) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-3xl font-bold text-slate-900">Detalle de pedido</h1>
+        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+          No se pudo cargar el pedido: {pedidoError.message}
+        </p>
+      </div>
+    )
+  }
 
   if (!pedido) notFound()
 

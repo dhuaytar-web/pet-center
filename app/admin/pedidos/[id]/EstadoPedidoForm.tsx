@@ -6,24 +6,40 @@ import { useState } from 'react'
 type EstadoPedidoFormProps = {
   id: string
   estadoActual: 'pendiente' | 'confirmado' | 'listo' | 'entregado' | 'cancelado'
+  onSaved?: () => void | Promise<void>
 }
 
 const estados = ['pendiente', 'confirmado', 'listo', 'entregado', 'cancelado'] as const
 
-export default function EstadoPedidoForm({ id, estadoActual }: EstadoPedidoFormProps) {
+export default function EstadoPedidoForm({ id, estadoActual, onSaved }: EstadoPedidoFormProps) {
   const router = useRouter()
   const [estado, setEstado] = useState(estadoActual)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSave() {
     setSaving(true)
-    await fetch(`/api/admin/pedidos/${id}/estado`, {
+    setError(null)
+
+    const response = await fetch(`/api/admin/pedidos/${id}/estado`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ estado }),
     })
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null
+      setError(payload?.error ?? 'No se pudo guardar el estado.')
+      setSaving(false)
+      return
+    }
+
     setSaving(false)
-    router.refresh()
+    if (onSaved) {
+      await onSaved()
+    } else {
+      router.refresh()
+    }
   }
 
   return (
@@ -48,6 +64,7 @@ export default function EstadoPedidoForm({ id, estadoActual }: EstadoPedidoFormP
       >
         {saving ? 'Guardando...' : 'Guardar estado'}
       </button>
+      {error && <p className="text-xs font-medium text-rose-700">{error}</p>}
     </div>
   )
 }

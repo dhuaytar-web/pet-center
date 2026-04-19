@@ -1,19 +1,30 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 async function getDashboardData() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
+  if (!supabase) {
+    return {
+      productos: 0,
+      pedidos: 0,
+      pendientes: 0,
+      error: 'Falta configurar SUPABASE_SERVICE_ROLE_KEY en el entorno.',
+    }
+  }
 
-  const [{ count: productos }, { count: pedidos }, { count: pendientes }] = await Promise.all([
+  const [{ count: productos, error: productosError }, { count: pedidos, error: pedidosError }, { count: pendientes, error: pendientesError }] = await Promise.all([
     supabase.from('productos').select('*', { count: 'exact', head: true }),
     supabase.from('pedidos').select('*', { count: 'exact', head: true }),
     supabase.from('pedidos').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente'),
   ])
 
+  const hasError = productosError || pedidosError || pendientesError
+
   return {
     productos: productos ?? 0,
     pedidos: pedidos ?? 0,
     pendientes: pendientes ?? 0,
+    error: hasError ? 'No se pudieron cargar metricas del dashboard.' : null,
   }
 }
 
@@ -23,6 +34,12 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
+
+      {data.error && (
+        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+          {data.error}
+        </p>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <article className="rounded-2xl border border-cyan-100 bg-white p-4 shadow-sm">

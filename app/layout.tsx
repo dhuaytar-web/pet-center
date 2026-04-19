@@ -1,14 +1,18 @@
 import type { Metadata } from 'next'
-import { Poppins } from 'next/font/google'
-import Footer from '@/components/store/Footer'
-import Navbar from '@/components/store/Navbar'
-import WhatsAppButton from '@/components/store/WhatsAppButton'
+import { Nunito, Poppins } from 'next/font/google'
+import PublicChrome from '../components/store/PublicChrome'
 import { CartProvider } from '@/lib/CartContext'
 import './globals.css'
 
+const nunito = Nunito({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-nunito',
+})
+
 const poppins = Poppins({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['500', '600', '700'],
   variable: '--font-poppins',
 })
 
@@ -24,14 +28,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={`${poppins.variable} antialiased`}>
+      <body className={`${nunito.variable} ${poppins.variable} antialiased`}>
         <CartProvider>
-          <div className="min-h-screen bg-white text-slate-900">
-            <Navbar />
-            <main>{children}</main>
-            <Footer />
-            <WhatsAppButton />
-          </div>
+          <PublicChrome>{children}</PublicChrome>
         </CartProvider>
       </body>
     </html>

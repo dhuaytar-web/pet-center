@@ -1,20 +1,40 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import AdminProductosTable from '@/components/admin/AdminProductosTable'
 
 type ProductoRow = {
   id: string
   nombre: string
+  slug: string
   precio: number
+  categoria_id: string
   activo: boolean
   disponible?: boolean
   stock?: number
+  descripcion?: string | null
+  subcategoria_id?: string | null
+  imagen_url?: string | null
+  destacado?: boolean
+  aviso_legal?: boolean
+  recomendacion_medica?: string | null
 }
 
 export default async function AdminProductosPage() {
-  const supabase = await createClient()
-  const { data } = await supabase
+  const supabase = createAdminClient()
+  if (!supabase) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold text-slate-900">Productos</h1>
+        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+          Falta configurar SUPABASE_SERVICE_ROLE_KEY para mostrar el panel administrativo.
+        </p>
+      </div>
+    )
+  }
+
+  const { data, error } = await supabase
     .from('productos')
-    .select('id,nombre,precio,activo,disponible,stock')
+    .select('id,nombre,slug,precio,categoria_id,activo,disponible,stock,descripcion,subcategoria_id,imagen_url,destacado,aviso_legal,recomendacion_medica')
     .order('created_at', { ascending: false })
 
   const productos: ProductoRow[] = (data as ProductoRow[] | null) ?? []
@@ -28,53 +48,13 @@ export default async function AdminProductosPage() {
         </Link>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-cyan-100 bg-white shadow-sm">
-        <table className="w-full min-w-[720px] text-sm">
-          <thead className="bg-cyan-50 text-left text-cyan-900">
-            <tr>
-              <th className="px-4 py-3">Nombre</th>
-              <th className="px-4 py-3">Precio</th>
-              <th className="px-4 py-3">Disponibilidad</th>
-              <th className="px-4 py-3">Estado</th>
-              <th className="px-4 py-3">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productos.map((producto) => {
-              const disponible =
-                typeof producto.disponible === 'boolean' ? producto.disponible : (producto.stock ?? 0) > 0
-              return (
-                <tr key={producto.id} className="border-t border-cyan-100">
-                  <td className="px-4 py-3 font-medium text-slate-900">{producto.nombre}</td>
-                  <td className="px-4 py-3 text-slate-700">S/ {Number(producto.precio).toFixed(2)}</td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-1 text-xs font-semibold ${disponible ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700'}`}>
-                      {disponible ? 'Disponible' : 'Agotado'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-1 text-xs font-semibold ${producto.activo ? 'bg-cyan-100 text-cyan-800' : 'bg-rose-100 text-rose-700'}`}>
-                      {producto.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Link href={`/admin/productos/${producto.id}`} className="text-xs font-semibold text-cyan-700 hover:text-cyan-900">
-                      Editar
-                    </Link>
-                  </td>
-                </tr>
-              )
-            })}
-            {productos.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
-                  No hay productos registrados.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      {error && (
+        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+          No se pudieron cargar productos: {error.message}
+        </p>
+      )}
+
+      <AdminProductosTable productos={productos} />
     </div>
   )
 }

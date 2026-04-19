@@ -17,13 +17,6 @@ type CreatePedidoBody = {
   }>
 }
 
-function buildFallbackOrderNumber() {
-  const now = new Date()
-  const yyyy = now.getFullYear()
-  const random = Math.floor(100 + Math.random() * 900)
-  return `PET-${yyyy}-${random}`
-}
-
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as CreatePedidoBody
@@ -42,12 +35,9 @@ export async function POST(request: Request) {
 
     const supabase = createClient(url, serviceRole ?? anon!)
 
-    const numeroPedido = buildFallbackOrderNumber()
-
     const { data: pedido, error: pedidoError } = await supabase
       .from('pedidos')
       .insert({
-        numero_pedido: numeroPedido,
         nombre_cliente: body.nombre_cliente,
         telefono: body.telefono,
         metodo_pago: body.metodo_pago,
@@ -82,7 +72,7 @@ export async function POST(request: Request) {
       .join(', ')
 
     await notifyOwnerNewOrder({
-      numeroPedido: pedido.numero_pedido ?? numeroPedido,
+      numeroPedido: pedido.numero_pedido,
       cliente: body.nombre_cliente,
       telefono: body.telefono,
       total: Number(body.total),
@@ -90,7 +80,7 @@ export async function POST(request: Request) {
       itemsText,
     })
 
-    return NextResponse.json({ numero_pedido: pedido.numero_pedido ?? numeroPedido })
+    return NextResponse.json({ numero_pedido: pedido.numero_pedido })
   } catch {
     return NextResponse.json({ error: 'Error inesperado al crear el pedido.' }, { status: 500 })
   }

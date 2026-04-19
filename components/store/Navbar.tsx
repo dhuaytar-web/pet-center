@@ -20,29 +20,29 @@ export default function Navbar() {
   const linkClass = (href: string) => {
     const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href)
     return isActive
-      ? 'text-cyan-800 bg-cyan-50 border-cyan-200'
-      : 'text-slate-700 border-transparent hover:text-cyan-700 hover:bg-cyan-50/70'
+      ? 'text-white bg-[#233f3a] border-[#233f3a] shadow-sm'
+      : 'text-[#46392f] border-transparent hover:text-[#8b3d17] hover:bg-[#fff8ef]'
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-cyan-100 bg-white/90 backdrop-blur">
-      <nav className="container-pet flex items-center justify-between py-3">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-600 text-white">
-            <Stethoscope size={18} />
+    <header className="sticky top-0 z-40 border-b border-[#d7c4ae]/70 bg-[#fffaf2]/88 backdrop-blur-xl">
+      <nav className="container-pet flex items-center justify-between py-4">
+        <Link href="/" className="flex items-center gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-[#1d4f47] to-[#c8571a] text-white shadow-md shadow-[#c7ab8f]/60">
+            <Stethoscope size={20} />
           </span>
           <div className="leading-tight">
-            <p className="text-sm font-semibold tracking-wide text-cyan-900">PET CENTER</p>
-            <p className="text-xs text-cyan-700">Veterinaria en Tacna</p>
+            <p className="text-base font-bold tracking-wide text-[#241f1a]">PET CENTER</p>
+            <p className="text-sm text-[#6a5a4b]">Clinica y pet shop en Tacna</p>
           </div>
         </Link>
 
-        <ul className="hidden items-center gap-2 text-sm font-medium md:flex">
+        <ul className="hidden items-center gap-2 rounded-2xl border border-[#d7c4ae]/80 bg-[#fff5ea]/85 p-1.5 text-base font-semibold md:flex">
           {navLinks.map((link) => (
             <li key={link.href}>
               <Link
                 href={link.href}
-                className={`rounded-xl border px-3 py-2 transition-colors ${linkClass(link.href)}`}
+                className={`rounded-xl border px-3.5 py-2.5 transition-colors ${linkClass(link.href)}`}
               >
                 {link.label}
               </Link>
@@ -52,11 +52,11 @@ export default function Navbar() {
 
         <Link
           href="/carrito"
-          className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-200 text-cyan-800 transition-colors hover:bg-cyan-50"
+          className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#d7c4ae] bg-white text-[#1d4f47] transition-colors hover:bg-[#fff6ec]"
           aria-label="Abrir carrito"
         >
-          <ShoppingCart size={18} />
-          <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-cyan-600 px-1 text-[11px] font-semibold text-white">
+          <ShoppingCart size={20} />
+          <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#c8571a] px-1 text-[11px] font-semibold text-white">
             {itemsCount}
           </span>
         </Link>
@@ -68,7 +68,7 @@ export default function Navbar() {
             <li key={link.href}>
               <Link
                 href={link.href}
-                className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold ${linkClass(link.href)}`}
+                className={`inline-flex rounded-full border px-3.5 py-2 text-sm font-semibold ${linkClass(link.href)}`}
               >
                 {link.label}
               </Link>

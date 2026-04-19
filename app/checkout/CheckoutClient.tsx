@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { FormEvent, useMemo, useState } from 'react'
+import CheckoutStepper from '@/components/store/CheckoutStepper'
 import { useCart } from '@/lib/CartContext'
 
 type MetodoPago = 'yape' | 'plin' | 'efectivo_tienda'
@@ -9,13 +10,23 @@ type MetodoPago = 'yape' | 'plin' | 'efectivo_tienda'
 export default function CheckoutClient() {
   const router = useRouter()
   const { items, subtotal, clearCart } = useCart()
+  const [step, setStep] = useState<1 | 2 | 3>(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [nombre, setNombre] = useState('')
+  const [telefono, setTelefono] = useState('')
+  const [notas, setNotas] = useState('')
   const [metodoPago, setMetodoPago] = useState<MetodoPago>('yape')
+
+  const storeAddress = process.env.NEXT_PUBLIC_STORE_ADDRESS ?? 'Av. Bolognesi 123, Tacna, Peru'
+  const yape = process.env.NEXT_PUBLIC_STORE_YAPE ?? '912345678'
+  const plin = process.env.NEXT_PUBLIC_STORE_PLIN ?? '912345678'
 
   const hasItems = items.length > 0
   const total = useMemo(() => subtotal, [subtotal])
   const hasLegalWarnings = useMemo(() => items.some((item) => item.producto.aviso_legal), [items])
+
+  const canContinueFromStep1 = nombre.trim().length > 0 && telefono.trim().length > 0
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -26,12 +37,11 @@ export default function CheckoutClient() {
       return
     }
 
-    const formData = new FormData(event.currentTarget)
-    const nombre_cliente = String(formData.get('nombre_cliente') ?? '').trim()
-    const telefono = String(formData.get('telefono') ?? '').trim()
-    const notas = String(formData.get('notas') ?? '').trim()
+    const nombre_cliente = nombre.trim()
+    const telefono_cliente = telefono.trim()
+    const notas_cliente = notas.trim()
 
-    if (!nombre_cliente || !telefono) {
+    if (!nombre_cliente || !telefono_cliente) {
       setError('Completa nombre y telefono para continuar.')
       return
     }
@@ -44,8 +54,8 @@ export default function CheckoutClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nombre_cliente,
-          telefono,
-          notas: notas || null,
+          telefono: telefono_cliente,
+          notas: notas_cliente || null,
           metodo_pago: metodoPago,
           metodo_entrega: 'recojo_tienda',
           total,
@@ -74,90 +84,136 @@ export default function CheckoutClient() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-      <form onSubmit={onSubmit} className="rounded-2xl border border-cyan-100 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">Datos del cliente</h2>
+      <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <CheckoutStepper step={step} />
 
-        <div className="mt-4 grid gap-3">
-          <label className="text-sm">
-            <span className="mb-1 block text-slate-700">Nombre completo</span>
-            <input
-              name="nombre_cliente"
-              required
-              className="w-full rounded-xl border border-cyan-200 px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
-            />
-          </label>
-
-          <label className="text-sm">
-            <span className="mb-1 block text-slate-700">Telefono / WhatsApp</span>
-            <input
-              name="telefono"
-              required
-              className="w-full rounded-xl border border-cyan-200 px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
-            />
-          </label>
-
-          <label className="text-sm">
-            <span className="mb-1 block text-slate-700">Notas (opcional)</span>
-            <textarea
-              name="notas"
-              rows={3}
-              className="w-full rounded-xl border border-cyan-200 px-3 py-2 outline-none ring-cyan-500 focus:ring-2"
-            />
-          </label>
-        </div>
-
-        <div className="mt-6 rounded-2xl bg-cyan-50 p-4">
-          <p className="text-sm font-semibold text-cyan-900">Metodo de pago</p>
-
-          <div className="mt-3 space-y-2 text-sm text-slate-700">
-            <label className="flex items-center gap-2">
+        {step === 1 && (
+          <div className="grid gap-3">
+            <label className="text-sm">
+              <span className="mb-1 block text-[10.5px] font-bold text-gray-400">Nombre completo</span>
               <input
-                type="radio"
-                name="metodo_pago"
-                value="yape"
-                checked={metodoPago === 'yape'}
-                onChange={() => setMetodoPago('yape')}
+                name="nombre_cliente"
+                required
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-[12px] outline-none ring-(--pet-green) focus:ring-2"
               />
-              Yape
             </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="metodo_pago"
-                value="plin"
-                checked={metodoPago === 'plin'}
-                onChange={() => setMetodoPago('plin')}
+
+            <label className="text-sm">
+              <span className="mb-1 block text-[10.5px] font-bold text-gray-400">Telefono / WhatsApp</span>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] font-semibold text-gray-500">+51</span>
+                <input
+                  name="telefono"
+                  required
+                  value={telefono}
+                  onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ''))}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-10 pr-3 text-[12px] outline-none ring-(--pet-green) focus:ring-2"
+                />
+              </div>
+            </label>
+
+            <label className="text-sm">
+              <span className="mb-1 block text-[10.5px] font-bold text-gray-400">Notas (opcional)</span>
+              <textarea
+                name="notas"
+                rows={3}
+                value={notas}
+                onChange={(e) => setNotas(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-[12px] outline-none ring-(--pet-green) focus:ring-2"
               />
-              Plin
             </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="metodo_pago"
-                value="efectivo_tienda"
-                checked={metodoPago === 'efectivo_tienda'}
-                onChange={() => setMetodoPago('efectivo_tienda')}
-              />
-              Efectivo en tienda
-            </label>
+
+            <button
+              type="button"
+              disabled={!canContinueFromStep1}
+              onClick={() => setStep(2)}
+              className="mt-2 rounded-xl bg-(--pet-green) px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Continuar →
+            </button>
           </div>
+        )}
 
-          {metodoPago !== 'efectivo_tienda' && (
-            <p className="mt-3 text-xs text-cyan-900">
-              Realiza el pago y la duena lo validara manualmente desde su app antes de confirmar.
-            </p>
-          )}
-        </div>
+        {step === 2 && (
+          <div className="space-y-3">
+            <div className="rounded-xl border-[1.5px] border-[#9FE1CB] bg-[#E1F5EE] p-3">
+              <p className="text-[11.5px] font-bold text-(--pet-green-dark)">Recojo en tienda</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-(--pet-green-mid)">{storeAddress}</p>
+            </div>
 
-        {error && <p className="mt-4 text-sm font-medium text-red-600">{error}</p>}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="flex-1 rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-700"
+              >
+                ← Volver
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep(3)}
+                className="flex-1 rounded-xl bg-(--pet-green) px-4 py-3 text-sm font-bold text-white"
+              >
+                Continuar →
+              </button>
+            </div>
+          </div>
+        )}
 
-        <button
-          type="submit"
-          disabled={loading || !hasItems}
-          className="mt-6 w-full rounded-xl bg-cyan-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-cyan-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-        >
-          {loading ? 'Procesando pedido...' : 'Confirmar pedido'}
-        </button>
+        {step === 3 && (
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 text-sm ${metodoPago === 'yape' ? 'border-(--pet-green) bg-[#E1F5EE]' : 'border-gray-200'}`}>
+                <input type="radio" name="metodo_pago" checked={metodoPago === 'yape'} onChange={() => setMetodoPago('yape')} />
+                Yape
+              </label>
+              <label className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 text-sm ${metodoPago === 'plin' ? 'border-(--pet-green) bg-[#E1F5EE]' : 'border-gray-200'}`}>
+                <input type="radio" name="metodo_pago" checked={metodoPago === 'plin'} onChange={() => setMetodoPago('plin')} />
+                Plin
+              </label>
+              <label className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 text-sm ${metodoPago === 'efectivo_tienda' ? 'border-(--pet-green) bg-[#E1F5EE]' : 'border-gray-200'}`}>
+                <input type="radio" name="metodo_pago" checked={metodoPago === 'efectivo_tienda'} onChange={() => setMetodoPago('efectivo_tienda')} />
+                Efectivo en tienda
+              </label>
+            </div>
+
+            {metodoPago !== 'efectivo_tienda' && (
+              <div className="rounded-xl border border-[#FAC775] bg-[#FAEEDA] p-3">
+                <p className="text-center text-[10px] text-[#854F0B]">Envia S/ {total.toFixed(2)} a este {metodoPago === 'yape' ? 'Yape' : 'Plin'}:</p>
+                <p className="font-display mt-1 text-center text-[16px] font-bold tracking-wide text-[#633806]">
+                  {metodoPago === 'yape' ? yape : plin}
+                </p>
+              </div>
+            )}
+
+            {metodoPago === 'efectivo_tienda' && (
+              <div className="rounded-xl border border-gray-200 bg-gray-100 p-3 text-center text-[11px] text-gray-600">
+                Paga al momento de recoger en tienda.
+              </div>
+            )}
+
+            {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="flex-1 rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-700"
+              >
+                ← Volver
+              </button>
+              <button
+                type="submit"
+                disabled={loading || !hasItems}
+                className="flex-1 rounded-xl bg-(--pet-green) px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading ? 'Procesando...' : 'Confirmar pedido'}
+              </button>
+            </div>
+          </div>
+        )}
       </form>
 
       <aside className="h-fit rounded-2xl border border-cyan-100 bg-white p-4 shadow-sm">

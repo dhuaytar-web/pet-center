@@ -11,17 +11,32 @@ type FiltrosProps = {
   opciones: OpcionFiltro[]
   selected?: string
   query?: string
+  extraParams?: Record<string, string | undefined>
 }
 
-export default function Filtros({ basePath, paramName, opciones, selected, query }: FiltrosProps) {
+export default function Filtros({ basePath, paramName, opciones, selected, query, extraParams }: FiltrosProps) {
+  const applyExtraParams = (params: URLSearchParams) => {
+    if (!extraParams) return
+
+    for (const [key, value] of Object.entries(extraParams)) {
+      if (value) {
+        params.set(key, value)
+      }
+    }
+  }
+
+  const allParams = new URLSearchParams()
+  if (query) allParams.set('q', query)
+  applyExtraParams(allParams)
+
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2.5">
       <Link
-        href={`${basePath}${query ? `?q=${encodeURIComponent(query)}` : ''}`}
-        className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+        href={`${basePath}${allParams.toString() ? `?${allParams.toString()}` : ''}`}
+        className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
           !selected
-            ? 'border-cyan-600 bg-cyan-600 text-white'
-            : 'border-cyan-200 bg-white text-cyan-900 hover:bg-cyan-50'
+            ? 'border-teal-700 bg-teal-700 text-white'
+            : 'border-slate-300 bg-white text-slate-800 hover:border-teal-300 hover:bg-teal-50/60 hover:text-teal-900'
         }`}
       >
         Todos
@@ -32,15 +47,16 @@ export default function Filtros({ basePath, paramName, opciones, selected, query
         const params = new URLSearchParams()
         params.set(paramName, opcion.value)
         if (query) params.set('q', query)
+        applyExtraParams(params)
 
         return (
           <Link
             key={opcion.value}
             href={`${basePath}?${params.toString()}`}
-            className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+            className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
               active
-                ? 'border-cyan-600 bg-cyan-600 text-white'
-                : 'border-cyan-200 bg-white text-cyan-900 hover:bg-cyan-50'
+                ? 'border-teal-700 bg-teal-700 text-white'
+                : 'border-slate-300 bg-white text-slate-800 hover:border-teal-300 hover:bg-teal-50/60 hover:text-teal-900'
             }`}
           >
             {opcion.label}

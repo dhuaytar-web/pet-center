@@ -1,11 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: #0891b2;
-  --color-primary-dark: #164e63;
-  --color-accent: #f0fdfa;
-  --color-surface: #f8fcfc;
-  --color-text: #0f172a;
+  --pet-green: #1d9e75;
+  --pet-green-light: #e1f5ee;
+  --pet-green-dark: #085041;
+  --pet-green-mid: #0f6e56;
+  --pet-amber: #ef9f27;
+  --pet-amber-light: #faeeda;
+  --color-brand: #0b3b36;
+  --color-brand-dark: #082a27;
+  --color-accent: #c8571a;
+  --color-ink: #1e1f22;
+  --color-paper: #f4efe8;
+  --color-panel: #fff9f2;
 }
 
 * {
@@ -19,12 +26,42 @@ html {
 }
 
 body {
-  font-family: var(--font-poppins), sans-serif;
+  font-family: var(--font-nunito), sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
   background:
-    radial-gradient(circle at top right, rgba(8, 145, 178, 0.08), transparent 35%),
-    radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.08), transparent 30%),
-    #ffffff;
-  color: var(--color-text);
+    radial-gradient(90rem 70rem at 110% -10%, rgba(11, 59, 54, 0.12), transparent 45%),
+    radial-gradient(88rem 68rem at -20% 115%, rgba(200, 87, 26, 0.13), transparent 43%),
+    linear-gradient(180deg, #ffffff 0%, var(--color-paper) 100%);
+  background-size: auto, auto, auto;
+  color: var(--color-ink);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-poppins), sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-poppins), sans-serif;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+::selection {
+  background: rgba(200, 87, 26, 0.2);
+  color: #2b1a12;
 }
 
 a,
@@ -38,12 +75,128 @@ select {
 .container-pet {
   margin-inline: auto;
   width: 100%;
-  max-width: 72rem;
+  max-width: 82rem;
   padding-inline: 1rem;
+}
+
+.glass {
+  background: rgba(255, 250, 244, 0.82);
+  border: 1px solid rgba(157, 132, 102, 0.26);
+  backdrop-filter: blur(12px);
+}
+
+.surface-card {
+  border: 1px solid rgba(157, 132, 102, 0.28);
+  background: var(--color-panel);
+  box-shadow: 0 26px 54px -44px rgba(57, 38, 21, 0.48);
+}
+
+.page-shell {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 82rem;
+  padding: 2.25rem 1rem 3.5rem;
+}
+
+.page-hero {
+  border: 1px solid rgba(157, 132, 102, 0.3);
+  border-radius: 1.8rem;
+  background:
+    radial-gradient(40rem 29rem at 88% -16%, rgba(11, 59, 54, 0.17), transparent 55%),
+    radial-gradient(35rem 24rem at -10% 116%, rgba(200, 87, 26, 0.17), transparent 50%),
+    #fffaf4;
+  box-shadow: 0 34px 70px -46px rgba(57, 38, 21, 0.5);
+}
+
+.hero-local-photo {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image:
+    linear-gradient(120deg, rgba(11, 59, 54, 0.22), rgba(200, 87, 26, 0.16)),
+    url('/images/local.jpg'),
+    url('/images/placeholder.svg');
+  background-size: cover;
+  background-position: center;
+  filter: saturate(1.04) contrast(1.03);
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(11, 59, 54, 0.28);
+  background: rgba(11, 59, 54, 0.1);
+  color: #0b3b36;
+  border-radius: 999px;
+  padding: 0.42rem 0.78rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.95rem;
+  background: linear-gradient(135deg, #0b3b36 0%, #11554e 100%);
+  color: white;
+  font-weight: 700;
+  padding: 0.78rem 1.2rem;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #082a27 0%, #0b3b36 100%);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(157, 132, 102, 0.42);
+  background: rgba(255, 249, 239, 0.88);
+  color: #3c3128;
+  font-weight: 700;
+  padding: 0.78rem 1.2rem;
+  transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  border-color: rgba(200, 87, 26, 0.44);
+  color: #7f3311;
+}
+
+.reveal-up {
+  animation: reveal-up 0.65s ease both;
+}
+
+.reveal-up-delay {
+  animation: reveal-up 0.65s ease 0.15s both;
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (min-width: 640px) {
   .container-pet {
+    padding-inline: 1.5rem;
+  }
+
+  .page-shell {
     padding-inline: 1.5rem;
   }
 }

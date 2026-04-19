@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useMemo, useReducer } from 'react'
+import { createContext, useContext, useEffect, useMemo, useReducer, useRef } from 'react'
 import type { CartItem, Producto } from '@/lib/types'
 
 type CartState = {
@@ -9,31 +9,32 @@ type CartState = {
 
 type CartAction =
   | { type: 'HYDRATE'; payload: CartItem[] }
-  | { type: 'ADD_ITEM'; payload: Producto }
+  | { type: 'ADD_ITEM'; payload: { producto: Producto; cantidad: number } }
   | { type: 'REMOVE_ITEM'; payload: string }
   | { type: 'SET_QTY'; payload: { productId: string; cantidad: number } }
   | { type: 'CLEAR' }
 
-const STORAGE_KEY = 'pet-center-cart'
+const STORAGE_KEY = 'petcenter_cart'
 
 function reducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case 'HYDRATE':
       return { items: action.payload }
     case 'ADD_ITEM': {
-      const existing = state.items.find((item) => item.producto.id === action.payload.id)
+      const incomingQty = Math.max(1, Math.min(99, action.payload.cantidad))
+      const existing = state.items.find((item) => item.producto.id === action.payload.producto.id)
       if (existing) {
         return {
           items: state.items.map((item) =>
-            item.producto.id === action.payload.id
-              ? { ...item, cantidad: Math.min(item.cantidad + 1, 99) }
+            item.producto.id === action.payload.producto.id
+              ? { ...item, cantidad: Math.min(item.cantidad + incomingQty, 99) }
               : item
           ),
         }
       }
 
       return {
-        items: [...state.items, { producto: action.payload, cantidad: 1 }],
+        items: [...state.items, { producto: action.payload.producto, cantidad: incomingQty }],
       }
     }
     case 'REMOVE_ITEM':
@@ -61,7 +62,7 @@ type CartContextValue = {
   items: CartItem[]
   itemsCount: number
   subtotal: number
-  addItem: (producto: Producto) => void
+  addItem: (producto: Producto, cantidad?: number) => void
   removeItem: (productId: string) => void
   setQty: (productId: string, cantidad: number) => void
   clearCart: () => void
@@ -71,6 +72,7 @@ const CartContext = createContext<CartContextValue | null>(null)
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, { items: [] })
+  const isHydratedRef = useRef(false)
 
   useEffect(() => {
     try {
@@ -83,9 +85,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Ignore invalid localStorage payloads.
     }
+
+    isHydratedRef.current = true
   }, [])
 
   useEffect(() => {
+    if (!isHydratedRef.current) return
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items))
   }, [state.items])
 
@@ -97,7 +103,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       items: state.items,
       itemsCount,
       subtotal,
-      addItem: (producto) => dispatch({ type: 'ADD_ITEM', payload: producto }),
+      addItem: (producto, cantidad = 1) => dispatch({ type: 'ADD_ITEM', payload: { producto, cantidad } }),
       removeItem: (productId) => dispatch({ type: 'REMOVE_ITEM', payload: productId }),
       setQty: (productId, cantidad) => dispatch({ type: 'SET_QTY', payload: { productId, cantidad } }),
       clearCart: () => dispatch({ type: 'CLEAR' }),

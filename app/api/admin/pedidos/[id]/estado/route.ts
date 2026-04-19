@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { notifyCustomerOrderStatus } from '@/lib/notifications'
+import { createClient as createSessionClient } from '@/lib/supabase/server'
+import { isAdminEmail } from '@/lib/admin-auth'
 
 type EstadoPedido = 'pendiente' | 'confirmado' | 'listo' | 'entregado' | 'cancelado'
 
@@ -16,6 +18,15 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
+  const sessionClient = await createSessionClient()
+  const {
+    data: { user },
+  } = await sessionClient.auth.getUser()
+
+  if (!isAdminEmail(user?.email)) {
+    return NextResponse.json({ error: 'No autorizado.' }, { status: 403 })
+  }
+
   const supabase = getAdminClient()
   if (!supabase) return NextResponse.json({ error: 'Config Supabase incompleta.' }, { status: 500 })
 
