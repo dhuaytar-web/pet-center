@@ -188,10 +188,7 @@ const FALLBACK_PRODUCTS: FallbackProduct[] = [
 ]
 
 function fallbackProductToProducto(producto: FallbackProduct): Producto {
-  const cleanedProduct = { ...producto }
-  delete cleanedProduct.categoriaSlug
-  delete cleanedProduct.brand
-  delete cleanedProduct.salesCount
+  const { categoriaSlug, brand, salesCount, ...cleanedProduct } = producto
   return cleanedProduct
 }
 
